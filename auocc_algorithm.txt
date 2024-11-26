@@ -1,0 +1,51 @@
+Algorithm: Encrypt and Redirect Process
+Input:
+
+companyData['passphrase']: Passphrase for encryption
+companyData['url']: URL for redirection
+data: Data to be encrypted (usually course-related data)
+Output:
+
+Encrypted token (basexxx encoded)
+Redirect URL with the encrypted token
+Steps:
+Retrieve Company Data:
+
+Set passphrase = companyData['passphrase']
+Set url = companyData['url']
+Generate Random Salt:
+
+Generate a random salt of xxx bytes:
+salt = openssl_random_pseudo_bytes(xxx)
+Derive Encryption Key:
+
+Set the number of iterations:
+iterations = xxx
+Derive the key using PBKDF2 with SHA-256:
+key = hash_pbkdf2('sha256', passphrase, salt, iterations, xxx, true)
+Generate Initialization Vector (IV):
+
+Generate a random IV of length required for the AES cipher:
+iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('AES'))
+Encrypt Data:
+
+Convert the data to JSON format:
+json_data = json_encode(data)
+Encrypt the data using AES, with the derived key and IV:
+encrypted_data = openssl_encrypt(json_data, 'AES', key, OPENSSL_RAW_DATA, iv)
+Base64 Encode Encrypted Data, IV, and Salt:
+
+Base64 encode the encrypted data, IV, and salt:
+encoded_encrypted_data = basexxx_encode(encrypted_data)
+encoded_iv = basexxx_encode(iv)
+encoded_salt = basexxx_encode(salt)
+Combine the basexxx encoded values:
+encrypted_token = encoded_encrypted_data . ':' . encoded_iv . ':' . encoded_salt
+Generate Redirect URL:
+
+Construct the URL for redirection with the encrypted token:
+redirect_url = url . 'token=' . urlencode(encrypted_token)
+Output:
+
+Return a JSON response with the encrypted token and redirect URL:
+return json_encode({'success': true, 'encrypted': encrypted_token, 'redirectUrl': redirect_url})
