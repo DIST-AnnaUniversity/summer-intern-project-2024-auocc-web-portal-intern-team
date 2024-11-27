@@ -1,0 +1,25 @@
+1. Start
+
+2. Check if the user is logged in:
+   - If not logged in, return error: {"success": false, "message": "User not logged in"}
+
+3. Retrieve the course ID and rating from the incoming request:
+   - If course_id or rating is missing, return error: {"success": false, "message": "Invalid input"}
+
+4. Check if the user has already rated this course:
+   - Query the database for existing rating using course_id and student_id:
+     - Query: "SELECT COUNT(*) FROM ratings WHERE course_id = :course_id AND student_id = :student_id"
+
+5. If the user has already rated the course:
+   - Execute UPDATE query to update the rating:
+     - Query: "UPDATE ratings SET rating = :rating WHERE course_id = :course_id AND student_id = :student_id"
+   - Return success: {"success": true, "message": "Rating updated successfully"}
+
+6. If the user has not rated the course:
+   - Execute INSERT query to add a new rating:
+     - Query: "INSERT INTO ratings (course_id, student_id, rating) VALUES (:course_id, :student_id, :rating)"
+   - Return success: {"success": true, "message": "Rating submitted successfully"}
+
+7. If any error occurs during the process, return error: {"success": false, "message": "Error submitting rating: [error message]"}
+
+8. End
