@@ -1,0 +1,92 @@
+BEGIN
+
+    // Step 1: User submits registration form
+    USER submits registration form with:
+        - username
+        - first_name
+        - last_name
+        - phone
+        - email
+        - password
+        - profile_picture (optional)
+        - role_proof (optional)
+        - country_of_residence
+
+    // Step 2: Validate input data
+    IF email is not in valid format THEN
+        DISPLAY error message: "Invalid email format."
+        EXIT
+    END IF
+
+    IF passwords do not match THEN
+        DISPLAY error message: "Passwords do not match."
+        EXIT
+    END IF
+
+    // Step 3: Check if email already exists
+    QUERY database for existing email:
+        IF email already exists THEN
+            DISPLAY error message: "Email already registered."
+            EXIT
+        END IF
+    END QUERY
+
+    // Step 4: Generate unique verification token
+    verificationToken = generateUniqueVerificationToken()
+    tokenExpiry = current_time + 24 hours
+
+    // Step 5: Hash user password
+    hashedPassword = hashPassword(password)
+
+    // Step 6: Store user details and verification token in database
+    QUERY database:
+        INSERT user details into database (username, first_name, last_name, phone, email, hashedPassword, verificationToken, tokenExpiry, approval_status = 'pending')
+    END QUERY
+
+    // Step 7: Send verification email to user
+    emailSubject = "Verify Your Email Address"
+    emailBody = 
+        "<html><body>" +
+        "<h1>Verify Your Email</h1>" +
+        "<p>Dear " + first_name + ",</p>" +
+        "<p>Thank you for signing up. Please click the link below to verify your email address:</p>" +
+        "<p><a href='http://yourdomain.com/verify.php?token=" + verificationToken + "'>Verify Email</a></p>" +
+        "<p>This link will expire in 24 hours.</p>" +
+        "</body></html>"
+
+    SEND email to user with subject = emailSubject and body = emailBody
+
+    // Step 8: Check if email was sent successfully
+    IF email sent successfully THEN
+        DISPLAY success message: "Verification email sent. Please check your inbox."
+    ELSE
+        DISPLAY error message: "Error sending email. Please try again."
+        EXIT
+    END IF
+
+    // Step 9: User clicks on the verification link in the email
+    IF user visits verification URL:
+        token = extractTokenFromURL()
+
+        // Step 10: Validate the token
+        QUERY database:
+            SELECT user details WHERE token = token AND expiry > current_time
+        END QUERY
+
+        IF token is invalid OR expired THEN
+            DISPLAY error message: "Invalid or expired token."
+            EXIT
+        END IF
+
+        // Step 11: Update user's account to "verified"
+        QUERY database:
+            UPDATE user SET approval_status = 'approved' WHERE token = token
+        END QUERY
+
+        // Step 12: Display success message and redirect user to login
+        DISPLAY message: "Your email has been successfully verified. You can now log in."
+        REDIRECT to login page
+
+    END IF
+
+END
